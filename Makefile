@@ -1,4 +1,4 @@
-FLAGS = -Wall -pthread -g
+FLAGS = -Wall -lrt -pthread -g
 
 all: broker producer consumer
 
