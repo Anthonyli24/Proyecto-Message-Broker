@@ -1,22 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/sem.h>
+#include <string.h>
 #include <unistd.h>
 
 #define BUFFER_SIZE 1024 // Tamaño del buffer
 
-struct memoria_compartida {
-    char buffer[BUFFER_SIZE]; // Buffer para almacenar el mensaje
-    int ready; // Indica si el buffer está listo para ser leído (1) o si ya fue procesado (2)
-};
+struct memoria_compartida { char buffer[BUFFER_SIZE]; };
 
 int main() {
     // Genera una clave única para la memoria compartida. Usa ftok para crear una clave única basada en el directorio actual y un carácter.
     // Usa shmget para crear un segmento de memoria compartida. Usa 0666 para establecer permisos de lectura y escritura.
     key_t key = ftok(".", 'X');
+    key_t semkey = ftok(".", 'S');
     int shmid = shmget(key, sizeof(struct memoria_compartida), 0666);
+    int semid = semget(semkey, 3, 0666);
+
+    struct memoria_compartida* shm = (struct memoria_compartida*) shmat(shmid, NULL, 0); // Conecta a la memoria compartida
+    struct sembuf wait_prod = {0, -1, 0}; // Esperar permiso para escribir
+    struct sembuf signal_broker = {1, 1, 0}; // Avisar al broker
 
     // Verifica si la memoria compartida se ha creado correctamente. Si no se ha creado correctamente, imprime un mensaje de error y sale del programa
     if (shmid == -1) {
@@ -24,25 +28,25 @@ int main() {
         exit(1);
     }
 
-    // Conecta a la memoria compartida
-    struct memoria_compartida* shm = (struct memoria_compartida*) shmat(shmid, NULL, 0);
-
     // Verifica si la memoria compartida se ha asociado correctamente. Si no se ha asociado correctamente, imprime un mensaje de error y sale del programa.
     if (shm == (void*) -1) {
         perror("[Producer] Error al asociar memoria");
         exit(1);
     }
+    
+    // Verifica si los semáforos se han creado correctamente. Si no se han creado correctamente, imprime un mensaje de error y sale del programa
+    if (semid == -1) {
+        perror("[Producer] Error al acceder a semáforos");
+        exit(1);
+    }
 
     while (1) { // Inicializa el estado de la memoria compartida
-        if (shm->ready == 0) { // Indica que el buffer está vacío
-            printf("[Producer] Ingrese mensaje: ");
-            fgets(shm->buffer, BUFFER_SIZE, stdin);
-            shm->buffer[strcspn(shm->buffer, "\n")] = '\0'; // Elimina el salto de línea al final del mensaje.
-            shm->ready = 1; // Indica que el buffer tiene un mensaje listo para leer.
-        } else {
-            printf("[Producer] Esperando que el buffer esté libre...\n");
-        }
-        sleep(1);//Condicion de carrera por solucionar. Revision constante del buffer.
-    }
+        semop(semid, &wait_prod, 1); 
+
+        printf("[Producer] Ingrese mensaje: ");
+        fgets(shm->buffer, BUFFER_SIZE, stdin);
+        shm->buffer[strcspn(shm->buffer, "\n")] = '\0'; // Eliminar salto de línea
+
+        semop(semid, &signal_broker, 1);}
     return 0;
 }
