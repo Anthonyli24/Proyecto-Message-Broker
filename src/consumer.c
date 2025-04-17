@@ -48,7 +48,10 @@ int main() {
 
         printf("[Consumer] Mensaje recibido: %s\n", shm->buffer); 
         
+        if (strcmp(shm->buffer, "exit") == 0) { 
+            break;
+        }
+        
         semop(semid, &signal_prod, 1);
-
     }  
 }

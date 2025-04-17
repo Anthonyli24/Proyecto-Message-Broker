@@ -57,6 +57,10 @@ int main() {
             fclose(log);
         }
 
+        if (strcmp(shm->buffer, "exit") == 0) {
+            break;
+        }
+
         semop(semid, &signal_consumer, 1);
     }
     return 0;

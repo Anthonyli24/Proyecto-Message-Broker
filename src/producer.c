@@ -20,7 +20,7 @@ int main() {
 
     struct memoria_compartida* shm = (struct memoria_compartida*) shmat(shmid, NULL, 0); // Conecta a la memoria compartida
     struct sembuf wait_prod = {0, -1, 0}; // Esperar permiso para escribir
-    struct sembuf signal_broker = {1, 1, 0}; // Avisar al broker
+    struct sembuf signal_broker = {1, 1, 0}; // Señalar al broker
 
     // Verifica si la memoria compartida se ha creado correctamente. Si no se ha creado correctamente, imprime un mensaje de error y sale del programa
     if (shmid == -1) {
@@ -45,8 +45,13 @@ int main() {
 
         printf("[Producer] Ingrese mensaje: ");
         fgets(shm->buffer, BUFFER_SIZE, stdin);
-        shm->buffer[strcspn(shm->buffer, "\n")] = '\0'; // Eliminar salto de línea
+        shm->buffer[strcspn(shm->buffer, "\n")] = '\0';
+    
+        if (strcmp(shm->buffer, "exit") == 0) {
+            break;
+        }
 
-        semop(semid, &signal_broker, 1);}
+        semop(semid, &signal_broker, 1);
+    }
     return 0;
 }
