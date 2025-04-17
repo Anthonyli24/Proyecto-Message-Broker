@@ -7,9 +7,6 @@
 #include <unistd.h>
 
 #define BUFFER_SIZE 1024 // Tamaño del buffer
-#define SEM_PROD 0
-#define SEM_BROKER 1
-#define SEM_CONSUMER 2
 
 struct memoria_compartida { char buffer[BUFFER_SIZE]; };
 
@@ -51,7 +48,7 @@ int main() {
         if (strcmp(shm->buffer, "exit") == 0) { 
             break;
         }
-        
+
         semop(semid, &signal_prod, 1);
     }  
 }
