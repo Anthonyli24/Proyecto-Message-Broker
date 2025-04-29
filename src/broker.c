@@ -96,6 +96,7 @@ void *manejar_udp_descubrimiento(void *arg) {
 
 void *manejar_cliente(void *arg) {
     int socket_cliente = *(int *)arg;
+    free(arg);
     char buffer[TAM_BUFFER];
     int bytes_recibidos;
 
@@ -157,7 +158,7 @@ void *manejar_conexiones_tcp(void *arg) {
             int *socket_ptr = malloc(sizeof(int));
             *socket_ptr = nuevo_cliente;
             pthread_create(&hilo_cliente, NULL, manejar_cliente, socket_ptr);
-            pthread_detach(hilo_cliente);
+            pthread_detach(hilo_cliente);  
         } else {
             printf("Máximo de clientes alcanzado\n");
             close(nuevo_cliente);
@@ -167,6 +168,7 @@ void *manejar_conexiones_tcp(void *arg) {
 
     return NULL;
 }
+
 
 int main() {
     int socket_udp, socket_tcp;
