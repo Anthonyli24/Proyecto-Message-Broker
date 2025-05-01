@@ -2,11 +2,10 @@
 
 **Curso:** EIF-212 Sistemas Operativos  
 **Autores:** Steven Acuña Zuñiga, Anthony Li Perera, Andres Rodriguez Castro, y Valeria Mesen Brenes  
-**Fecha de entrega:** 4 de mayo de 2025
 
 ---
 
-## 📝 Descripción del sistema
+## 📌 Descripción del sistema
 
 Este proyecto implementa un sistema distribuido de mensajería inspirado en Apache Kafka. El sistema está compuesto por:
 
@@ -20,7 +19,7 @@ Se utiliza **broadcast UDP** para el descubrimiento automático del broker en la
 
 ## ⚙️ Cómo compilar y ejecutar
 
-### 🔧 Requisitos
+### 📚 Requisitos
 - GCC (compilador de C)
 - Linux o entorno compatible con POSIX (pthread, sockets)
 - `make`
@@ -43,7 +42,3 @@ Se utiliza **broadcast UDP** para el descubrimiento automático del broker en la
 ---
 
 ## ⚠️ Problemas conocidos o limitaciones 
-
-
-
-
