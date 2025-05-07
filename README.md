@@ -44,8 +44,6 @@ Para prevenir interbloqueos (deadlocks) entre hilos al acceder a recursos compar
 
 En lugar de usar `pthread_mutex_lock` (que bloquea indefinidamente), se usa `trylock` para intentar adquirir el mutex.  
 Si no está disponible, el hilo espera un tiempo aleatorio y vuelve a intentar, evitando así la condición de espera circular.
-
-Este enfoque simple y efectivo permite mantener el sistema libre de deadlocks sin necesidad de establecer un orden fijo para la adquisición de locks.
 ---
 
 ## ⚠️ Problemas conocidos o limitaciones 
