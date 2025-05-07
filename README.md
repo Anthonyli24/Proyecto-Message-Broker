@@ -38,7 +38,24 @@ Se utiliza **broadcast UDP** para el descubrimiento automático del broker en la
 ---
 
 ## 🛡️ Explicación de la estrategia utilizada para evitar interbloqueos 
+Para prevenir interbloqueos (deadlocks) entre hilos al acceder a recursos compartidos como la cola de mensajes, la lista de clientes y los offsets de grupo, se implementó una estrategia basada en:
 
+**Intento no bloqueante con reintento (`pthread_mutex_trylock` + `usleep`)**
+
+En lugar de usar `pthread_mutex_lock` (que bloquea indefinidamente), se usa `trylock` para intentar adquirir el mutex.  
+Si no está disponible, el hilo espera un tiempo aleatorio y vuelve a intentar, evitando así la condición de espera circular.
+
+Este enfoque simple y efectivo permite mantener el sistema libre de deadlocks sin necesidad de establecer un orden fijo para la adquisición de locks.
 ---
 
 ## ⚠️ Problemas conocidos o limitaciones 
+
+- **Asignación aleatoria de grupos a consumidores:**  
+  Actualmente, los consumidores se asignan aleatoriamente a uno de los tres grupos (`A`, `B`, `C`), lo que puede causar un **desequilibrio de carga** si muchos consumidores caen en el mismo grupo.  
+  Se podría mejorar balanceando de forma dinámica según el número de consumidores activos por grupo.
+
+- **La cola de mensajes es finita (`MAX_MENSAJES = 1000`) y puede llenarse:**  
+  Si los consumidores no procesan los mensajes lo suficientemente rápido, el broker puede dejar de aceptar nuevos mensajes una vez que la cola esté llena, ya que no hay un mecanismo de control de flujo o backpressure.
+
+- **Sin manejo explícito de reconexión o persistencia de offset:**  
+  Si un consumidor se desconecta, su estado (offset) se pierde. No hay persistencia de los offsets en disco, por lo que el consumidor no puede continuar desde el último mensaje recibido en una reconexión.
