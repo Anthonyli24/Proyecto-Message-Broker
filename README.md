@@ -49,8 +49,7 @@ En lugar de usar `pthread_mutex_lock` (que bloquea indefinidamente), se usa `try
 ## ⚠️ Problemas conocidos o limitaciones 
 
 - **Asignación aleatoria de grupos a consumidores:**  
-  Actualmente, los consumidores se asignan aleatoriamente a uno de los tres grupos (`A`, `B`, `C`), lo que puede causar un **desequilibrio de carga** si muchos consumidores caen en el mismo grupo.  
-  Se podría mejorar balanceando de forma dinámica según el número de consumidores activos por grupo.
+  Actualmente, los consumidores se asignan aleatoriamente a uno de los tres grupos (`A`, `B`, `C`), lo que puede causar un **desequilibrio de carga** si muchos consumidores caen en el mismo grupo. Se podría mejorar     balanceando de forma dinámica según el número de consumidores activos por grupo.
 
 - **La cola de mensajes es finita (`MAX_MENSAJES = 1000`) y puede llenarse:**  
   Si los consumidores no procesan los mensajes lo suficientemente rápido, el broker puede dejar de aceptar nuevos mensajes una vez que la cola esté llena, ya que no hay un mecanismo de control de flujo o backpressure.
